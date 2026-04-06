@@ -9,6 +9,15 @@ export interface EcoAnalysis {
   waterExplanation: string;
   packagingScore: number;
   packagingExplanation: string;
+  repairabilityLabel: string;
+  repairabilityScore: number;
+  repairabilityExplanation: string;
+  recyclabilityLabel: string;
+  recyclabilityScore: number;
+  recyclabilityExplanation: string;
+  energyUseLabel: string;
+  energyScore: number;
+  energyExplanation: string;
   concerns: string[];
   funFact: string;
   alternatives: {
@@ -16,6 +25,12 @@ export interface EcoAnalysis {
     reason: string;
     ecoScore: number;
     url?: string;
+    carbonScore: number;
+    waterScore: number;
+    packagingScore: number;
+    repairabilityScore: number;
+    recyclabilityScore: number;
+    energyScore: number;
   }[];
   citations: {
     title: string;

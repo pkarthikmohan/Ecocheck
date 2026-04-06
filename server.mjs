@@ -12,18 +12,15 @@ var __dirname = path.dirname(__filename);
 var TEXT_MODELS = [
   "llama-3.3-70b-versatile",
   // best quality
-  "llama3-70b-8192",
-  // stable fallback
-  "mixtral-8x7b-32768",
-  // another option
+  // "llama3-70b-8192",           // stable fallback
+  // "mixtral-8x7b-32768",        // another option
   "llama-3.1-8b-instant"
   // fastest / most quota
 ];
 var VISION_MODELS = [
-  "meta-llama/llama-4-scout-17b-16e-instruct",
+  "meta-llama/llama-4-scout-17b-16e-instruct"
   // multimodal
-  "llama-3.2-11b-vision-preview"
-  // vision fallback
+  // "llama-3.2-11b-vision-preview",              // vision fallback
 ];
 function getGroq() {
   const apiKey = process.env.GROQ_API_KEY || "";
@@ -44,10 +41,19 @@ Return ONLY a valid JSON object with these exact fields:
   "waterExplanation": string (1-2 sentences, specific numbers),
   "packagingScore": number (0-100),
   "packagingExplanation": string (1-2 sentences),
+  "repairabilityLabel": string (e.g. "Highly repairable vs single-use"),
+  "repairabilityScore": number (0-100),
+  "repairabilityExplanation": string (1-2 sentences),
+  "recyclabilityLabel": string (e.g. "100% recyclable vs e-waste"),
+  "recyclabilityScore": number (0-100),
+  "recyclabilityExplanation": string (1-2 sentences),
+  "energyUseLabel": string (e.g. "Energy intensive vs efficient"),
+  "energyScore": number (0-100),
+  "energyExplanation": string (1-2 sentences),
   "concerns": string[] (3-5 specific environmental concerns),
   "funFact": string (one memorable eco fact about the product),
   "alternatives": [
-    { "name": string, "reason": string, "ecoScore": number, "url": string }
+    { "name": string, "reason": string, "ecoScore": number, "carbonScore": number, "waterScore": number, "packagingScore": number, "repairabilityScore": number, "recyclabilityScore": number, "energyScore": number, "url": string }
   ] (3 greener alternatives),
   "citations": [
     { "title": string, "url": string }
@@ -69,9 +75,18 @@ Return ONLY a valid JSON object with these exact fields (in addition to the eco 
   "waterExplanation": string,
   "packagingScore": number,
   "packagingExplanation": string,
+  "repairabilityLabel": string,
+  "repairabilityScore": number,
+  "repairabilityExplanation": string,
+  "recyclabilityLabel": string,
+  "recyclabilityScore": number,
+  "recyclabilityExplanation": string,
+  "energyUseLabel": string,
+  "energyScore": number,
+  "energyExplanation": string,
   "concerns": string[],
   "funFact": string,
-  "alternatives": [{ "name": string, "reason": string, "ecoScore": number, "url": string }],
+  "alternatives": [{ "name": string, "reason": string, "ecoScore": number, "carbonScore": number, "waterScore": number, "packagingScore": number, "repairabilityScore": number, "recyclabilityScore": number, "energyScore": number, "url": string }],
   "citations": [{ "title": string, "url": string }],
   "verdict": string
 }`;
@@ -92,9 +107,18 @@ Return ONLY a valid JSON object:
   "waterExplanation": string,
   "packagingScore": number,
   "packagingExplanation": string,
+  "repairabilityLabel": string,
+  "repairabilityScore": number,
+  "repairabilityExplanation": string,
+  "recyclabilityLabel": string,
+  "recyclabilityScore": number,
+  "recyclabilityExplanation": string,
+  "energyUseLabel": string,
+  "energyScore": number,
+  "energyExplanation": string,
   "concerns": string[],
   "funFact": string,
-  "alternatives": [{ "name": string, "reason": string, "ecoScore": number, "url": string }],
+  "alternatives": [{ "name": string, "reason": string, "ecoScore": number, "carbonScore": number, "waterScore": number, "packagingScore": number, "repairabilityScore": number, "recyclabilityScore": number, "energyScore": number, "url": string }],
   "citations": [{ "title": string, "url": string }],
   "verdict": string
 }`;

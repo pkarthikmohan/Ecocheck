@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { motion } from "motion/react";
 import { EcoBadge } from "./EcoBadge";
-import { AlertTriangle, Leaf, Droplets, Package, ArrowRight, Sparkles, Share2, ExternalLink } from "lucide-react";
+import { AlertTriangle, Leaf, Droplets, Package, ArrowRight, Sparkles, Share2, ExternalLink, Wrench, Recycle, Zap } from "lucide-react";
 import { EcoAnalysis, Product } from "../types";
+import { ComparisonChart } from "./ComparisonChart";
 
 interface AnalysisViewProps {
   product: Product;
@@ -97,6 +99,7 @@ function MetricCard({ icon, label, value, score, explanation, color, strokeColor
 }
 
 export function AnalysisView({ product, analysis, imageUrl }: AnalysisViewProps) {
+  const [selectedAltIndex, setSelectedAltIndex] = useState(0);
   const colors = gradeColors[analysis.grade] || gradeColors.C;
 
   const handleShare = async () => {
@@ -206,6 +209,36 @@ export function AnalysisView({ product, analysis, imageUrl }: AnalysisViewProps)
           strokeColor="#f97316"
           delay={0.3}
         />
+        <MetricCard
+          icon={<Wrench className="w-4 h-4 text-purple-600" />}
+          label="Repairability"
+          value={analysis.repairabilityLabel || "Not evaluated"}
+          score={analysis.repairabilityScore || 0}
+          explanation={analysis.repairabilityExplanation || ""}
+          color="bg-purple-50"
+          strokeColor="#a855f7"
+          delay={0.4}
+        />
+        <MetricCard
+          icon={<Recycle className="w-4 h-4 text-teal-600" />}
+          label="Recyclability"
+          value={analysis.recyclabilityLabel || "Not evaluated"}
+          score={analysis.recyclabilityScore || 0}
+          explanation={analysis.recyclabilityExplanation || ""}
+          color="bg-teal-50"
+          strokeColor="#14b8a6"
+          delay={0.5}
+        />
+        <MetricCard
+          icon={<Zap className="w-4 h-4 text-yellow-600" />}
+          label="Energy Use"
+          value={analysis.energyUseLabel || "Not evaluated"}
+          score={analysis.energyScore || 0}
+          explanation={analysis.energyExplanation || ""}
+          color="bg-yellow-50"
+          strokeColor="#eab308"
+          delay={0.6}
+        />
       </div>
 
       {/* Concerns */}
@@ -246,15 +279,22 @@ export function AnalysisView({ product, analysis, imageUrl }: AnalysisViewProps)
       <div>
         <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Greener alternatives</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {analysis.alternatives.map((alt, i) => (
+          {analysis.alternatives.map((alt, i) => {
+            const isSelected = selectedAltIndex === i;
+            return (
             <motion.div
               key={i}
+              onClick={() => setSelectedAltIndex(i)}
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ type: "spring", stiffness: 200, damping: 20, delay: i * 0.15 }}
               whileHover={{ y: -8, scale: 1.05, rotate: -1 }}
-              className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex flex-col justify-between gap-4 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-emerald-200/50"
+              className={`bg-white/90 backdrop-blur-sm rounded-2xl p-5 border cursor-pointer flex flex-col justify-between gap-4 transition-all ${
+                isSelected 
+                  ? "border-emerald-500 shadow-[0_8px_30px_rgba(16,185,129,0.15)] ring-2 ring-emerald-500/20" 
+                  : "border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-emerald-200/50"
+              }`}
             >
               <div>
                 <div className="flex justify-between items-start mb-2">
@@ -267,19 +307,28 @@ export function AnalysisView({ product, analysis, imageUrl }: AnalysisViewProps)
                   <TypewriterText text={alt.reason} delay={0.3 + (i * 0.15)} />
                 </p>
               </div>
-              {alt.url && (
-                <a
-                  href={alt.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-800 transition-colors"
-                >
-                  View product <ExternalLink className="w-3 h-3" />
-                </a>
-              )}
+              <div className="flex items-center justify-between mt-2">
+                {alt.url ? (
+                  <a
+                    href={alt.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-800 transition-colors"
+                  >
+                    View product <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : <span />}
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? "text-emerald-600" : "text-slate-400"}`}>
+                  {isSelected ? "Selected" : "Compare"}
+                </span>
+              </div>
             </motion.div>
-          ))}
+          )})}
         </div>
+        
+        {/* Comparison Chart */}
+        <ComparisonChart analysis={analysis} selectedAlternative={analysis.alternatives[selectedAltIndex]} />
       </div>
 
       {/* Citations */}
