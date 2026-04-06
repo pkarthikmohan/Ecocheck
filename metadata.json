@@ -1,0 +1,5 @@
+{
+  "name": "EcoCheck",
+  "description": "AI-powered sustainable consumption assistant that analyzes products for their environmental impact and suggests greener alternatives.",
+  "requestFramePermissions": ["camera"]
+}
