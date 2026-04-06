@@ -1,21 +1,40 @@
 import { Product } from "../types";
+import { motion, Variants } from "motion/react";
 
 interface ProductListProps {
   products: Product[];
   onSelect: (product: Product) => void;
 }
 
+const container: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 }
+  }
+};
+
+const item: Variants = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
+
 export function ProductList({ products, onSelect }: ProductListProps) {
   if (products.length === 0) return null;
 
   return (
-    <div className="max-w-2xl mx-auto mt-4 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden divide-y divide-slate-50">
+    <motion.ul 
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="max-w-2xl mx-auto mt-4 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-slate-100 overflow-hidden divide-y divide-slate-50"
+    >
       {products.map((product) => (
-        <button
-          key={product.code}
-          onClick={() => onSelect(product)}
-          className="w-full p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors text-left"
-        >
+        <motion.li key={product.code} variants={item}>
+          <button
+            onClick={() => onSelect(product)}
+            className="w-full p-4 flex items-center gap-4 hover:bg-emerald-50/50 transition-colors text-left group"
+          >
           {product.image_url ? (
             <img
               src={product.image_url}
@@ -32,8 +51,9 @@ export function ProductList({ products, onSelect }: ProductListProps) {
             <h4 className="font-bold text-slate-900 line-clamp-1">{product.product_name}</h4>
             <p className="text-sm text-slate-500">{product.brands || 'Unknown Brand'}</p>
           </div>
-        </button>
+          </button>
+        </motion.li>
       ))}
-    </div>
+    </motion.ul>
   );
 }

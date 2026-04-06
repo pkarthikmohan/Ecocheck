@@ -5,19 +5,33 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", sans-serif;
 
-  --color-eco-a: #22c55e;
+  --color-eco-a: #08CB00;
   --color-eco-b: #84cc16;
   --color-eco-c: #eab308;
   --color-eco-d: #f97316;
   --color-eco-f: #ef4444;
+
+  /* Apply requested color theme globally by overriding default tailwind variables */
+  --color-emerald-400: #08CB00;
+  --color-emerald-500: #08CB00;
+  --color-emerald-600: #07A300;
+  
+  --color-slate-900: #253900;
+  --color-slate-800: #253900;
+  --color-slate-700: #253900;
+  
+  --color-slate-50: #EEEEEE;
+  --color-slate-100: #E4E4E4;
 }
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    background-color: #EEEEEE;
+    color: #253900;
+    @apply font-sans antialiased;
   }
 }
 
 .eco-gradient {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  background: linear-gradient(135deg, #08CB00 0%, #253900 100%);
 }

@@ -103,23 +103,27 @@ export function Scanner({ onScan, isLoading }: ScannerProps) {
 
   return (
     <div className="flex justify-center gap-4">
-      <button
+      <motion.button
         onClick={startCamera}
         disabled={isLoading}
-        className="flex items-center gap-2 px-6 py-3 bg-eco-a text-white rounded-2xl font-bold shadow-lg hover:bg-eco-a/90 transition-all disabled:opacity-50"
+        whileHover={{ scale: isLoading ? 1 : 1.05 }}
+        whileTap={{ scale: isLoading ? 1 : 0.95 }}
+        className="flex items-center gap-2 px-6 py-3 bg-eco-a text-white rounded-2xl font-bold shadow-lg hover:bg-eco-a/90 transition-colors disabled:opacity-50"
       >
         {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
         Scan Product
-      </button>
+      </motion.button>
 
-      <button
+      <motion.button
         onClick={() => fileInputRef.current?.click()}
         disabled={isLoading}
-        className="flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border-2 border-slate-200 rounded-2xl font-bold shadow-sm hover:border-eco-a transition-all disabled:opacity-50"
+        whileHover={{ scale: isLoading ? 1 : 1.05 }}
+        whileTap={{ scale: isLoading ? 1 : 0.95 }}
+        className="flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-md text-slate-700 border-2 border-slate-200 rounded-2xl font-bold shadow-sm hover:border-emerald-400 hover:text-emerald-600 transition-colors disabled:opacity-50"
       >
         <Upload className="w-5 h-5" />
         Upload Photo
-      </button>
+      </motion.button>
 
       <input
         type="file"
@@ -135,16 +139,23 @@ export function Scanner({ onScan, isLoading }: ScannerProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-4"
           >
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
               onClick={stopCamera}
-              className="absolute top-6 right-6 text-white p-2 bg-white/10 rounded-full"
+              className="absolute top-6 right-6 text-white p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
             >
               <X className="w-8 h-8" />
-            </button>
+            </motion.button>
             
-            <div className="relative w-full max-w-lg aspect-[3/4] bg-slate-900 rounded-3xl overflow-hidden border-2 border-white/20">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-lg aspect-[3/4] bg-slate-900 rounded-3xl overflow-hidden border border-white/20 shadow-2xl"
+            >
               {!stream && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-white/40 gap-3">
                   <Loader2 className="w-10 h-10 animate-spin" />
@@ -158,17 +169,25 @@ export function Scanner({ onScan, isLoading }: ScannerProps) {
                 muted
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 border-[40px] border-black/40 pointer-events-none">
-                <div className="w-full h-full border-2 border-eco-a/50 rounded-xl" />
+              <div className="absolute inset-0 border-[40px] border-black/50 pointer-events-none backdrop-blur-[2px]">
+                <div className="w-full h-full border-2 border-emerald-400/50 rounded-xl relative overflow-hidden">
+                  <motion.div 
+                    className="absolute left-0 right-0 h-0.5 bg-emerald-400/80 shadow-[0_0_10px_rgba(52,211,153,1)]"
+                    animate={{ top: ["0%", "100%", "0%"] }}
+                    transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                  />
+                </div>
               </div>
-            </div>
+            </motion.div>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9 }}
               onClick={captureImage}
-              className="mt-8 w-20 h-20 bg-white rounded-full border-8 border-white/20 flex items-center justify-center shadow-2xl active:scale-95 transition-transform"
+              className="mt-8 w-20 h-20 bg-white rounded-full border-[6px] border-emerald-500/30 flex items-center justify-center shadow-2xl transition-colors hover:border-emerald-500/50"
             >
-              <div className="w-14 h-14 bg-eco-a rounded-full" />
-            </button>
+              <div className="w-14 h-14 bg-emerald-500 rounded-full" />
+            </motion.button>
             
             <p className="mt-4 text-white/60 text-sm font-medium">Align product within the frame</p>
           </motion.div>

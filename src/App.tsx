@@ -16,6 +16,7 @@ export default function App() {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [analysis, setAnalysis] = useState<EcoAnalysis | null>(null);
+  const [scannedImage, setScannedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false); // kept for SearchBar prop
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export default function App() {
     setSearchResults([]);
     setAnalysis(null);
     setSelectedProduct(null);
+    setScannedImage(null);
 
     // Background: fetch real product list from OFF (for "pick different" UX)
     searchProducts(query).then(setSearchResults).catch(() => {});
@@ -63,6 +65,7 @@ export default function App() {
     setIsLoading(true);
     setError(null);
     setAnalysis(null);
+    setScannedImage(null);
     try {
       const result = await analyzeProduct(product);
       setAnalysis(result);
@@ -81,6 +84,7 @@ export default function App() {
     setSelectedProduct(null);
     setAnalysis(null);
     setSearchResults([]);
+    setScannedImage(base64Image);
     try {
       const result = await analyzeImage(base64Image, mimeType);
       if (result.isProduct === false) {
@@ -111,16 +115,40 @@ export default function App() {
           brand: product.brands || 'Unknown',
           grade: result.grade,
           ecoScore: result.ecoScore,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          analysis: result,
+          product: product
         }
       ].slice(-20)
     }));
   };
 
+  const handleHistoryClick = (item: any) => {
+    if (item.analysis && item.product) {
+      setAnalysis(item.analysis);
+      setSelectedProduct(item.product);
+      setSearchResults([]);
+      setScannedImage(null); // Assuming no scanned image for history
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // Fallback for older saved history items
+      handleSearch(item.name);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const isEmpty = !analysis && !isLoading && !searchResults.length && !isSearching;
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-24 relative overflow-hidden bg-[#EEEEEE] selection:bg-[#08CB00]/30 text-[#253900]">
+      {/* Background Ambient Glow matching the requested palette */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#08CB00]/20 rounded-full blur-[80px] mix-blend-multiply animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute top-[20%] right-[-5%] w-[30rem] h-[30rem] bg-[#253900]/15 rounded-full blur-[100px] mix-blend-multiply animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+        <div className="absolute bottom-[-10%] left-[20%] w-[40rem] h-[40rem] bg-[#000000]/10 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDuration: '12s', animationDelay: '4s' }} />
+      </div>
+
+      <div className="relative z-10">
       {/* Header */}
       <header className="pt-12 pb-10 px-4 text-center space-y-5">
         <motion.div
@@ -202,7 +230,7 @@ export default function App() {
 
         {/* Stats */}
         <div className="max-w-4xl mx-auto">
-          <StatsBanner stats={stats} />
+          <StatsBanner stats={stats} onHistoryClick={handleHistoryClick} />
         </div>
 
         {/* Results */}
@@ -210,7 +238,7 @@ export default function App() {
           {isLoading ? (
             <Skeleton />
           ) : analysis && selectedProduct ? (
-            <AnalysisView product={selectedProduct} analysis={analysis} />
+            <AnalysisView product={selectedProduct} analysis={analysis} imageUrl={scannedImage} />
           ) : isEmpty && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -238,6 +266,7 @@ export default function App() {
           </p>
         </div>
       </footer>
+      </div>
     </div>
   );
 }

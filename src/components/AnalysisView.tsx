@@ -6,7 +6,34 @@ import { EcoAnalysis, Product } from "../types";
 interface AnalysisViewProps {
   product: Product;
   analysis: EcoAnalysis;
+  imageUrl?: string | null;
 }
+
+const TypewriterText = ({ text, delay = 0 }: { text: string; delay?: number }) => {
+  return (
+    <motion.span
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-20px" }}
+      variants={{
+        visible: { transition: { staggerChildren: 0.015, delayChildren: delay } },
+        hidden: {}
+      }}
+    >
+      {text.split("").map((char, index) => (
+        <motion.span
+          key={index}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1 }
+          }}
+        >
+          {char}
+        </motion.span>
+      ))}
+    </motion.span>
+  );
+};
 
 const gradeColors: Record<string, { bg: string; text: string; border: string; light: string }> = {
   A: { bg: "bg-emerald-500", text: "text-emerald-700", border: "border-emerald-200", light: "bg-emerald-50" },
@@ -36,15 +63,18 @@ function ScoreRing({ score, color, size = 80 }: { score: number; color: string; 
   );
 }
 
-function MetricCard({ icon, label, value, score, explanation, color, strokeColor }: {
+function MetricCard({ icon, label, value, score, explanation, color, strokeColor, delay = 0 }: {
   icon: React.ReactNode; label: string; value: string; score: number;
-  explanation: string; color: string; strokeColor: string;
+  explanation: string; color: string; strokeColor: string; delay?: number;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col gap-3"
+      initial={{ opacity: 0, y: 50, scale: 0.8, rotateX: 20 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      whileHover={{ y: -8, scale: 1.05, rotate: 1 }}
+      transition={{ type: "spring", stiffness: 250, damping: 20, delay }}
+      className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex flex-col gap-3 hover:border-emerald-200/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] cursor-default transform-gpu"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -58,13 +88,15 @@ function MetricCard({ icon, label, value, score, explanation, color, strokeColor
       </div>
       <div>
         <p className="font-bold text-slate-900 text-base">{value}</p>
-        <p className="text-xs text-slate-500 leading-relaxed mt-1">{explanation}</p>
+        <p className="text-xs text-slate-500 leading-relaxed mt-1">
+          <TypewriterText text={explanation} delay={delay + 0.3} />
+        </p>
       </div>
     </motion.div>
   );
 }
 
-export function AnalysisView({ product, analysis }: AnalysisViewProps) {
+export function AnalysisView({ product, analysis, imageUrl }: AnalysisViewProps) {
   const colors = gradeColors[analysis.grade] || gradeColors.C;
 
   const handleShare = async () => {
@@ -86,9 +118,19 @@ export function AnalysisView({ product, analysis }: AnalysisViewProps) {
       {/* Hero card */}
       <div className={`rounded-3xl p-6 md:p-8 border ${colors.border} ${colors.light}`}>
         <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+          
           <div className="relative shrink-0">
-            <EcoBadge grade={analysis.grade} size="lg" />
-            <div className="absolute -bottom-2 -right-2 bg-white rounded-full px-2 py-0.5 shadow border border-slate-100">
+            {imageUrl ? (
+              <img 
+                src={imageUrl} 
+                alt="Scanned product" 
+                className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-sm"
+              />
+            ) : (
+              <EcoBadge grade={analysis.grade} size="lg" />
+            )}
+            <div className="absolute -bottom-2 -right-2 bg-white rounded-full px-2.5 py-0.5 shadow border border-slate-100 flex items-center gap-1.5">
+              {imageUrl && <span className={`text-xs font-black ${colors.text}`}>{analysis.grade}</span>}
               <span className="text-xs font-bold text-slate-600">{analysis.ecoScore}/100</span>
             </div>
           </div>
@@ -110,24 +152,30 @@ export function AnalysisView({ product, analysis }: AnalysisViewProps) {
               </button>
             </div>
             <p className={`mt-3 text-sm md:text-base leading-relaxed font-medium ${colors.text}`}>
-              {analysis.verdict}
+              <TypewriterText text={analysis.verdict} delay={0.2} />
             </p>
           </div>
         </div>
 
         {/* Fun fact strip */}
         {analysis.funFact && (
-          <div className="mt-5 flex items-start gap-3 p-4 bg-white/60 rounded-2xl border border-white/80">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ type: "spring", delay: 0.4 }}
+            className="mt-5 flex items-start gap-3 p-4 bg-white/60 rounded-2xl border border-white/80"
+          >
             <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
             <p className="text-sm text-slate-700 leading-relaxed">
-              <span className="font-bold">Did you know? </span>{analysis.funFact}
+              <span className="font-bold">Did you know? </span><TypewriterText text={analysis.funFact} delay={0.6} />
             </p>
-          </div>
+          </motion.div>
         )}
       </div>
 
       {/* Metric cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 perspective-1000">
         <MetricCard
           icon={<Leaf className="w-4 h-4 text-emerald-600" />}
           label="Carbon"
@@ -136,6 +184,7 @@ export function AnalysisView({ product, analysis }: AnalysisViewProps) {
           explanation={analysis.carbonExplanation}
           color="bg-emerald-50"
           strokeColor="#22c55e"
+          delay={0.1}
         />
         <MetricCard
           icon={<Droplets className="w-4 h-4 text-blue-600" />}
@@ -145,6 +194,7 @@ export function AnalysisView({ product, analysis }: AnalysisViewProps) {
           explanation={analysis.waterExplanation}
           color="bg-blue-50"
           strokeColor="#3b82f6"
+          delay={0.2}
         />
         <MetricCard
           icon={<Package className="w-4 h-4 text-orange-600" />}
@@ -154,12 +204,19 @@ export function AnalysisView({ product, analysis }: AnalysisViewProps) {
           explanation={analysis.packagingExplanation}
           color="bg-orange-50"
           strokeColor="#f97316"
+          delay={0.3}
         />
       </div>
 
       {/* Concerns */}
       {analysis.concerns.length > 0 && (
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ type: "spring", stiffness: 200, damping: 25 }}
+          className="bg-white/90 backdrop-blur-md rounded-2xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+        >
           <h3 className="font-bold text-slate-900 flex items-center gap-2 mb-4">
             <AlertTriangle className="w-4 h-4 text-amber-500" />
             Key environmental concerns
@@ -168,17 +225,21 @@ export function AnalysisView({ product, analysis }: AnalysisViewProps) {
             {analysis.concerns.map((concern, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.08 }}
+                initial={{ opacity: 0, scale: 0.8, x: -20 }}
+                whileInView={{ opacity: 1, scale: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ type: "spring", delay: i * 0.1, stiffness: 250 }}
+                whileHover={{ scale: 1.02 }}
                 className="flex items-start gap-3 p-3 bg-amber-50 rounded-xl border border-amber-100"
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 shrink-0" />
-                <p className="text-sm text-slate-700 leading-relaxed">{concern}</p>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  <TypewriterText text={concern} delay={0.2 + (i * 0.1)} />
+                </p>
               </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Alternatives */}
@@ -188,11 +249,12 @@ export function AnalysisView({ product, analysis }: AnalysisViewProps) {
           {analysis.alternatives.map((alt, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -4 }}
-              className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between gap-4"
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ type: "spring", stiffness: 200, damping: 20, delay: i * 0.15 }}
+              whileHover={{ y: -8, scale: 1.05, rotate: -1 }}
+              className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex flex-col justify-between gap-4 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-emerald-200/50"
             >
               <div>
                 <div className="flex justify-between items-start mb-2">
@@ -201,7 +263,9 @@ export function AnalysisView({ product, analysis }: AnalysisViewProps) {
                     {alt.ecoScore}/100
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">{alt.reason}</p>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  <TypewriterText text={alt.reason} delay={0.3 + (i * 0.15)} />
+                </p>
               </div>
               {alt.url && (
                 <a

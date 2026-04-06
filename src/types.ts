@@ -46,5 +46,7 @@ export interface AppStats {
     grade: string;
     ecoScore: number;
     timestamp: number;
+    analysis?: EcoAnalysis;
+    product?: Product;
   }[];
 }
